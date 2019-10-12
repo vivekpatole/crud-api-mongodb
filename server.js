@@ -121,6 +121,27 @@ app.put('/api/user/:id', (req, res) => {
         });
 });
 
+// API to delete user record by id
+app.delete('/api/user/:id', (req, res) => {
+    // Read request parameter
+    let id = req.params.id;
+
+    User.findByIdAndRemove(id)
+        .then(function (result) {
+            if (!result) {
+                return res.status(404).send({ message: 'User not found with given id: ' + id });
+            }
+            res.status(200).send(result);
+        })
+        .catch(function (error) {
+            if (error.kind === 'ObjectId') {
+                return res.status(404).send({ message: 'User not found with given id: ' + id });
+            }
+            res.status(500).send({ message: 'Error occured while deleting user with id: ' + id });
+        });
+});
+
+
 // Function to check if object is empty or not
 function isEmpty(obj) {
     for (var key in obj) {

@@ -298,5 +298,64 @@ describe('PUT: /api/user/:id - Update user detils by id', function () {
 });
 
 
-describe('DELETE: ', function () {
+describe('DELETE: /api/user/:id - Delete user by id', function () {
+
+    it('should return error code (403) if authentication token is not supplied', function (done) {
+        chai.request(server)
+            .delete('/api/user/1')
+            .end(function (err, res) {
+                res.status.should.equal(403);
+                done();
+            });
+    });
+
+    it('should return error code (401) if invalid authentication token is supplied', function (done) {
+        chai.request(server)
+            .delete('/api/user/1')
+            .set('Authorization', process.env.WRONG_AUTH_TOKEN)
+            .end(function (err, res) {
+                res.status.should.equal(401);
+                done();
+            });
+    });
+
+    it('should delete user record by id', async function () {
+        const newUser = {
+            name: 'Mohit',
+            email: 'mohit@gmail.com',
+            mobile: '+919980009734',
+            gender: 'Male',
+            age: 38
+        };
+        const user = new User(newUser);
+        await user.save();
+
+        const res = await chai.request(server)
+            .delete('/api/user/' + user._id)
+            .set('Authorization', process.env.AUTH_TOKEN);
+        res.status.should.equal(200);
+    });
+
+    it('should return 404 when tried to read deleted user', async function () {
+        const newUser = {
+            name: 'Kamlesh',
+            email: 'kamlesh@gmail.com',
+            mobile: '+919988898034',
+            gender: 'Male',
+            age: 22
+        };
+        const user = new User(newUser);
+        await user.save();
+
+        const res = await chai.request(server)
+            .delete('/api/user/' + user._id)
+            .set('Authorization', process.env.AUTH_TOKEN);
+        res.status.should.equal(200);
+
+        const res1 = await chai.request(server)
+            .get('/api/user/' + user._id)
+            .set('Authorization', process.env.AUTH_TOKEN);
+        res1.status.should.equal(404);
+    });
+
 });
