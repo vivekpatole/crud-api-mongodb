@@ -174,7 +174,56 @@ describe('GET: /api/users - Read All Users', function () {
     });
 });
 
-describe('GET: ', function () {
+describe('GET: /api/user/:id - Read user by id', function () {
+
+    it('should return error code (403) if authentication token is not supplied', function (done) {
+        chai.request(server)
+            .get('/api/user/1')
+            .end(function (err, res) {
+                res.status.should.equal(403);
+                done();
+            });
+    });
+
+    it('should return error code (401) if invalid authentication token is supplied', function (done) {
+        chai.request(server)
+            .get('/api/user/1')
+            .set('Authorization', process.env.WRONG_AUTH_TOKEN)
+            .end(function (err, res) {
+                res.status.should.equal(401);
+                done();
+            });
+    });
+
+    it('should read user details by user id', async function () {
+        const newUser = {
+            name: 'Vinita',
+            email: 'vinita@gmail.com',
+            mobile: '+919988887734',
+            gender: 'Female',
+            age: 30
+        };
+        const user = new User(newUser);
+        await user.save();
+        const res = await chai.request(server)
+            .get('/api/user/' + user._id)
+            .set('Authorization', process.env.AUTH_TOKEN);
+        res.status.should.equal(200);
+        expect(res.body).to.have.property("name", newUser.name);
+        expect(res.body).to.have.property("email", newUser.email);
+        expect(res.body).to.have.property("gender", newUser.gender);
+        expect(res.body).to.have.property("age", newUser.age);
+    });
+
+    it('should not read user details - user not found', function (done) {
+        chai.request(server)
+            .get('/api/user/5da1fd003688ac19e6d60e73')
+            .set('Authorization', process.env.AUTH_TOKEN)
+            .end(function (err, res) {
+                res.status.should.equal(404);
+                done();
+            });
+    });
 });
 
 describe('PUT: ', function () {
