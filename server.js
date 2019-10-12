@@ -62,6 +62,18 @@ app.post('/api/user', (req, res) => {
     }
 });
 
+// API to get all users
+app.get('/api/users', (req, res) => {
+    // Read all users from database
+    User.find()
+        .then(function (result) {
+            res.status(200).send(result);
+        })
+        .catch(function (error) {
+            res.status(500).send({ message: error.message || 'Error occured while retrieving all users' });
+        });
+});
+
 // Function to check if object is empty or not
 function isEmpty(obj) {
     for (var key in obj) {

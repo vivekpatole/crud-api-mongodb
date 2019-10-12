@@ -140,7 +140,38 @@ describe('POST: /api/user - Create User', function () {
 
 });
 
-describe('GET: ', function () {
+describe('GET: /api/users - Read All Users', function () {
+
+    it('should return error code (403) if authentication token is not supplied', function (done) {
+        chai.request(server)
+            .get('/api/users')
+            .end(function (err, res) {
+                res.status.should.equal(403);
+                done();
+            });
+    });
+
+    it('should return error code (401) if invalid authentication token is supplied', function (done) {
+        chai.request(server)
+            .get('/api/users')
+            .set('Authorization', process.env.WRONG_AUTH_TOKEN)
+            .end(function (err, res) {
+                res.status.should.equal(401);
+                done();
+            });
+    });
+
+    it('should retrieve all users', function (done) {
+        chai.request(server)
+            .get('/api/users')
+            .set('Authorization', process.env.AUTH_TOKEN)
+            .end(function (err, res) {
+                res.status.should.equal(200);
+                res.body.should.be.a('array');
+                res.body.length.should.not.be.eql(0);
+                done();
+            });
+    });
 });
 
 describe('GET: ', function () {
