@@ -3,6 +3,8 @@ let bodyParser = require('body-parser');
 let mongoose = require("mongoose");
 require('dotenv').config();
 
+let User = require('./models/user');
+
 // Create express app
 let app = express();
 
@@ -38,6 +40,36 @@ mongoose.connect(DB_URL, DB_OPTIONS)
 app.all("/*", checkToken, function (req, res, next) {
     next();
 });
+
+// API to create new user
+app.post('/api/user', (req, res) => {
+    // Validate the request body
+    let data = req.body;
+    if (!data || isEmpty(data)) {
+        res.status(400).send({ message: 'Request body can not be empty' });
+    } else {
+        // Create new user
+        const user = new User(data);
+
+        // Save new user in database
+        user.save()
+            .then(function (result) {
+                res.status(201).send(result);
+            })
+            .catch(function (error) {
+                res.status(500).send({ message: error.message || 'Error occured while createing new user' });
+            });
+    }
+});
+
+// Function to check if object is empty or not
+function isEmpty(obj) {
+    for (var key in obj) {
+        if (obj.hasOwnProperty(key))
+            return false;
+    }
+    return true;
+}
 
 // Function to check authorization token
 function checkToken(req, res, next) {
