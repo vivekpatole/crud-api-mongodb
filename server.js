@@ -95,6 +95,32 @@ app.get('/api/user/:id', (req, res) => {
         });
 });
 
+// API to update existing user
+app.put('/api/user/:id', (req, res) => {
+    // Validate the request body
+    let data = req.body;
+    if (!data || isEmpty(data)) {
+        res.status(400).send({ message: 'Request body can not be empty' });
+    }
+
+    // Read request parameter
+    let id = req.params.id;
+
+    User.findByIdAndUpdate(id, data, { new: true })
+        .then(function (result) {
+            if (!result) {
+                return res.status(404).send({ message: 'User not found with given id: ' + id });
+            }
+            res.status(200).send(result);
+        })
+        .catch(function (error) {
+            if (error.kind === 'ObjectId') {
+                return res.status(404).send({ message: 'User not found with given id: ' + id });
+            }
+            res.status(500).send({ message: 'Error occured while updating user with id: ' + id });
+        });
+});
+
 // Function to check if object is empty or not
 function isEmpty(obj) {
     for (var key in obj) {
